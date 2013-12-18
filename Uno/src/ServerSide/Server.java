@@ -19,9 +19,9 @@ public class Server
 	{
 
 		ServerSocket serverSocket;
-		
-		//demander un port
-		int port = 51000;
+
+		// demander un port
+		int port = 51004;
 
 		try
 		{
@@ -32,8 +32,6 @@ public class Server
 		}
 		catch (IOException e)
 		{
-
-			e.printStackTrace();
 		}
 	}
 }
@@ -43,12 +41,10 @@ class NewClient implements Runnable
 
 	private ServerSocket socketserver;
 	private Socket socket;
-	private int nbrclient = 1;
+	private Socket socketTemp;
+	private int nbrclient = 0;
 	InputStream inStream;
-	OutputStream outStream;
-	
-	private String login;
-	private String pass;
+	PrintWriter out;
 
 	public NewClient(ServerSocket serversocket)
 	{
@@ -64,60 +60,52 @@ class NewClient implements Runnable
 			{
 
 				socket = socketserver.accept();
-				boolean correctPass = false;
+				nbrclient++;
 				
-				while (correctPass == false)
+				out = new PrintWriter(socket.getOutputStream());
+				
+				if (nbrclient > 2)
 				{
-					
-					Element loginNode = new Element("login");
-					loginNode.setText("Entrez votre nom d'utilisateur.");
-					try
+					ClientDenied();
+					socket.close();
+				}
+				else
+				{
+					if (nbrclient == 2)
 					{
-						Document doc = new Document(loginNode);
-						XMLOutputter xmlOut = new XMLOutputter();
-						xmlOut.output(doc, outStream);
-						outStream.flush();
-						//lire Login
-						Element passNode = new Element("pass");
-						passNode.setText("Entrez votre mot de passe.");
-						doc = new Document(passNode);
-						xmlOut.output(doc, outStream);
-						outStream.flush();
-					}
-					catch (Exception e) {}
-					
-					//lire Pass
-
-					if (ValidLogin(login, pass))
-					{
-						//Envoyer un msg au client pour confirmer la connection
-						System.out.println(login + " vient de se connecter ");
-						
-						correctPass = true;
+						LaunchGame game = new LaunchGame(socketTemp, socket);
+						game.Run();
 					}
 					else
 					{
-						//Envoyez une erreur au client
+						socketTemp = socket;
 					}
+					//socket.close();
 				}
 				
-				nbrclient++;
-				socket.close();
+				
 			}
-
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
 	}
-	
-	private boolean ValidLogin(String login, String pass)
+
+	public void ClientDenied()
 	{
-		
-		//Vérifiez dans un fichier txt ?
-		//On assume que le login est toujours bon ?
-		//À vérifier
-		return true;
+		Element error = new Element("Error");
+		Document doc = new Document(error);
+		XMLOutputter xmlOut = new XMLOutputter();
+		try
+		{
+			out = new PrintWriter(socket.getOutputStream());
+			out.write(xmlOut.outputString(doc));
+			out.flush();
+		}
+		catch (IOException e)
+		{
+		}
+
 	}
 }
