@@ -61,14 +61,8 @@ public class Game
 	{
 		this.socket = s;
 		
-		try
-		{
-			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-			Object o = in.readObject();
-			this.deck = (Deck) o;
-		}
-		catch (Exception e){}
-		
+		this.deck = new Deck();
+		deck.Shuffle();
 		
 		this.visuals = visuals;
 

@@ -37,11 +37,6 @@ public class LaunchGame
 		LaunchSignal();
 		PlayerInfo();
 
-		Deck deck = new Deck();
-		deck.Shuffle();
-
-		SendDeck();
-
 		while (gameIsRunning == true)
 		{
 			if (playerTurn == 1)
@@ -146,23 +141,6 @@ public class LaunchGame
 			gameIsRunning = true;
 		}
 		catch (Exception e)
-		{
-		}
-	}
-
-	private void SendDeck()
-	{
-		try
-		{
-			ObjectOutputStream outStream = new ObjectOutputStream(player1.getOutputStream());
-			outStream.writeObject(deck);
-			out.flush();
-
-			outStream = new ObjectOutputStream(player2.getOutputStream());
-			outStream.writeObject(deck);
-			out.flush();
-		}
-		catch (IOException e)
 		{
 		}
 	}
